@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mariadb-backup
+spec:
+  template:
+    metadata:
+      labels:
+        app: mariadb-backup
+    spec:
+      containers:
+      - name: backup-ninja
+        image: padminisys/backup-ninja
+        envFrom:
+        - secretRef:
+            name: mariadb-secret
+        env:
+        - name: ACTION
+          value: "backup"
+        volumeMounts:
+          - name: backup-volume
+            mountPath: /backup
+      restartPolicy: Never
+      volumes:
+        - name: backup-volume
+          persistentVolumeClaim:
+            claimName: mariadb-backup-pvc
+  backoffLimit: 4

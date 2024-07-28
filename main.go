@@ -11,12 +11,15 @@ func main() {
 	// Initialize logger
 	logger := log.New(os.Stdout, "INFO: ", log.LstdFlags)
 
-	// Retrieve environment variables
+	// Retrieve and log environment variables
 	mysqlHost := os.Getenv("MYSQL_HOST")
 	mysqlPort := os.Getenv("MYSQL_PORT")
 	mysqlUser := os.Getenv("MYSQL_USER")
 	mysqlPassword := os.Getenv("MYSQL_PASSWORD")
 	action := os.Getenv("ACTION")
+
+	logger.Printf("Environment Variables: MYSQL_HOST=%s, MYSQL_PORT=%s, MYSQL_USER=%s, MYSQL_PASSWORD=%s, ACTION=%s",
+		mysqlHost, mysqlPort, mysqlUser, mysqlPassword, action)
 
 	// Check if required environment variables are set
 	if mysqlHost == "" || mysqlPort == "" || mysqlUser == "" || mysqlPassword == "" {
@@ -55,6 +58,9 @@ func performBackup(logger *log.Logger, host, port, user, password string) {
 		os.Exit(1)
 	}
 
+	logger.Println("mysqldump command output:")
+	logger.Println(string(output))
+
 	// Write output to backup file
 	backupFilePath := "/backup/all_databases_backup.sql"
 	err = os.WriteFile(backupFilePath, output, 0644)
@@ -64,6 +70,7 @@ func performBackup(logger *log.Logger, host, port, user, password string) {
 	}
 
 	logger.Println("Backup successful")
+	os.Exit(0)
 }
 
 func performRestore(logger *log.Logger, host, port, user, password string) {
@@ -76,6 +83,9 @@ func performRestore(logger *log.Logger, host, port, user, password string) {
 		logger.Printf("Failed to read backup file: %v\n", err)
 		os.Exit(1)
 	}
+
+	logger.Println("Backup file content:")
+	logger.Println(string(input))
 
 	// Execute mysql command
 	cmd := exec.Command("mysql", "-h", host, "-P", port, "-u", user, "-p"+password)
@@ -91,4 +101,5 @@ func performRestore(logger *log.Logger, host, port, user, password string) {
 	}
 
 	logger.Println("Restore successful")
+	os.Exit(0)
 }
