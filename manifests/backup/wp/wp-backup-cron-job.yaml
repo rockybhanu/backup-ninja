@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wordpress-backup
+spec:
+  schedule: "0 */6 * * *" # Every six hours
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: wordpress-backup
+        spec:
+          containers:
+          - name: backup-ninja
+            image: padminisys/backup-ninja
+            envFrom:
+            - secretRef:
+                name: restic-wp-env-secrets
+            env:
+              - name: ACTION
+                value: "backup"
+              - name: BACKUP_TYPE
+                value: "pvc"          
+              - name: RESTIC_HOSTNAME
+                value: "oceanrain-wordpress"
+              - name: BACKUP_MOUNT_PATH
+                value: "/bitnami/wordpress"
+              - name: RESTORE_MOUNT_PATH
+                value: "/bitnami/wordpress"
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /bitnami/wordpress
+              subPath: wordpress
+          restartPolicy: Never
+        volumes:
+        - name: backup-volume
+          persistentVolumeClaim:
+            claimName: oceanrain-wordpress
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

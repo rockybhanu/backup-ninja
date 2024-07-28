@@ -17,6 +17,8 @@ spec:
         env:
         - name: ACTION
           value: "restore"
+        - name: BACKUP_TYPE
+          value: "db"            
         - name: RESTIC_HOSTNAME
           value: "oceanrain-mariadb"
         - name: BACKUP_MOUNT_PATH
