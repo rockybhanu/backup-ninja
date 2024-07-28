@@ -13,16 +13,22 @@ spec:
         image: padminisys/backup-ninja
         envFrom:
         - secretRef:
-            name: mariadb-secret
+            name: restic-mariadb-env-secrets
         env:
         - name: ACTION
           value: "backup"
+        - name: RESTIC_HOSTNAME
+          value: "oceanrain-mariadb"
+        - name: BACKUP_MOUNT_PATH
+          value: "/backup"
+        - name: RESTORE_MOUNT_PATH
+          value: "/backup"
         volumeMounts:
-          - name: backup-volume
-            mountPath: /backup
+        - name: backup-volume
+          mountPath: /backup
       restartPolicy: Never
       volumes:
-        - name: backup-volume
-          persistentVolumeClaim:
-            claimName: mariadb-backup-pvc
+      - name: backup-volume
+        persistentVolumeClaim:
+          claimName: mariadb-backup-pvc
   backoffLimit: 4
