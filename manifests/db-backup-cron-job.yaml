@@ -34,7 +34,7 @@ spec:
           restartPolicy: Never
           volumes:
           - name: backup-volume
-            persistentVolumeClaim:
-              claimName: mariadb-backup-pvc
+            emptyDir:
+              sizeLimit: 10Gi
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1

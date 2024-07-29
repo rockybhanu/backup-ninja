@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mariadb-restore
+  name: mariadb-backup
 spec:
   template:
     metadata:
       labels:
-        app: mariadb-restore
+        app: mariadb-backup
     spec:
       containers:
       - name: backup-ninja
@@ -16,21 +16,21 @@ spec:
             name: restic-mariadb-env-secrets
         env:
         - name: ACTION
-          value: "restore"
+          value: "backup"
         - name: BACKUP_TYPE
-          value: "db"            
+          value: "db"          
         - name: RESTIC_HOSTNAME
           value: "oceanrain-mariadb"
         - name: BACKUP_MOUNT_PATH
           value: "/backup"
         - name: RESTORE_MOUNT_PATH
-          value: "/"
+          value: "/backup"
         volumeMounts:
         - name: backup-volume
           mountPath: /backup
       restartPolicy: Never
       volumes:
       - name: backup-volume
-        persistentVolumeClaim:
-          claimName: mariadb-restore-pvc
+        emptyDir:
+          sizeLimit: 10Gi
   backoffLimit: 4
