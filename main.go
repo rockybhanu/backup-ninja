@@ -123,8 +123,11 @@ func performDBBackup(logger *log.Logger) {
 		os.Exit(1)
 	}
 
-	logger.Println("mysqldump command output:")
-	logger.Println(string(output))
+	// Check if mysqldump output is empty
+	if len(output) == 0 {
+		logger.Println("Backup failed: mysqldump output is empty")
+		os.Exit(1)
+	}
 
 	// Write output to backup file
 	backupFilePath := "/backup/all_databases_backup.sql"
@@ -133,6 +136,8 @@ func performDBBackup(logger *log.Logger) {
 		logger.Printf("Failed to write backup file: %v\n", err)
 		os.Exit(1)
 	}
+
+	logger.Println("Database backup completed successfully.")
 
 	logger.Printf("Starting backup of %s to %s with host %s", os.Getenv("BACKUP_MOUNT_PATH"), os.Getenv("RESTIC_REPOSITORY"), os.Getenv("RESTIC_HOSTNAME"))
 	backupCmd := exec.Command("restic", "-r", os.Getenv("RESTIC_REPOSITORY"), "--host", os.Getenv("RESTIC_HOSTNAME"), "backup", os.Getenv("BACKUP_MOUNT_PATH"))
@@ -176,8 +181,13 @@ func performDBRestore(logger *log.Logger) {
 		os.Exit(1)
 	}
 
-	logger.Println("Backup file content:")
-	logger.Println(string(input))
+	// Check if backup file is empty
+	if len(input) == 0 {
+		logger.Println("Restore failed: backup file is empty")
+		os.Exit(1)
+	}
+
+	logger.Println("Backup file validated successfully.")
 
 	// Retrieve database environment variables
 	mysqlHost := os.Getenv("MYSQL_HOST")
